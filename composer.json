@@ -1,0 +1,22 @@
+{
+    "name": "kewan/mapper",
+    "description": "Simple dsl for mapping data to an object",
+    "autoload": {
+        "psr-4": {
+            "Kewan\\": "src/"
+        }
+    },
+    "require": {
+        "laravel/helpers": "^1.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.5"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kewan",
+            "email": "kewan@crazylogical.com"
+        }
+    ]
+}
