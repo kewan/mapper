@@ -59,7 +59,7 @@ class Mapper
 
             if (is_callable($sourcePath)) {
                 $value = $sourcePath($this->source);
-            } else if (!preg_match('/\./', $sourcePath) && method_exists($this->source, $sourcePath)) {
+            } else if ($this->canBeCalled($this->source, $sourcePath)) {
                 $value = $this->source->{$sourcePath}();
             } else {
                 $value = data_get($this->source, $sourcePath);
@@ -69,7 +69,7 @@ class Mapper
                 $value = Arr::get($this->defaults, $destinationPath);
             }
 
-            if (method_exists($this->destination, $destinationPath)) {
+            if ($this->canBeCalled($this->destination, $destinationPath)) {
                 $this->destination->{$destinationPath}($value);
             } else {
                 data_set($this->destination, $destinationPath, $value);
@@ -78,4 +78,11 @@ class Mapper
 
         return $this->destination;
     }
+
+    private function canBeCalled($object, $method)
+    {
+        return !preg_match('/\./', $method) && is_callable([$object, $method]);
+    }
+
+
 }
