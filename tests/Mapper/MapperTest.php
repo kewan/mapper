@@ -20,6 +20,16 @@ class Item
     }
 }
 
+class SourceItem
+{
+    private $listId = 'list-123';
+
+    public function getListId()
+    {
+        return $this->listId;
+    }
+}
+
 class MapperTest extends TestCase
 {
 
@@ -177,5 +187,24 @@ class MapperTest extends TestCase
         $this->assertEquals('iPhone 8', $product->name);
         $this->assertEquals('This is the title for: iPhone 8', $product->title);
         $this->assertEquals(1000.99, $product->price); // From Defaults
+        $this->assertEquals("10%", $product->discount); // From Defaults
+    }
+
+    /**
+     * @test
+     */
+    public function it_can_call_a_source_method()
+    {
+        $item = new SourceItem();
+        $product = new \stdClass();
+
+        $mapper = new Mapper();
+
+        $item = $mapper->from($item)->to($product)->using([
+            'listId'   => 'getListId',
+        ])->get();
+
+
+        $this->assertEquals('list-123', $product->listId);
     }
 }

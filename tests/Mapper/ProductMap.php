@@ -10,24 +10,26 @@ class ProductMap extends Mappable
     public function getMap(): array
     {
         return [
-            'id'   => 'Item.Id',
-            'name' => 'Item.Name',
-            'title' => function($data) {
+            'id'    => 'Item.Id',
+            'name'  => 'Item.Name',
+            'title' => function ($data) {
                 return self::getTitle($data);
             },
-            'price' => 'Item.Price'
+            'price' => 'Item.Price',
         ];
     }
 
     public function getDefaults(): array
     {
         return [
-            'price' => 1000.99
+            'price'    => 1000.99,
+            'discount' => '10%',
         ];
     }
 
 
-    public function getTitle($data) {
+    public function getTitle($data)
+    {
 
         return 'This is the title for: ' . $data->Item->Name;
 

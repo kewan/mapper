@@ -40,8 +40,8 @@ class Mapper
             $mappable = new MappableArray($mappable);
         }
 
-        $this->mappings = $mappable->getMap();
         $this->defaults = $mappable->getDefaults();
+        $this->mappings = array_merge($this->defaults, $mappable->getMap());
 
         return $this;
     }
@@ -59,6 +59,8 @@ class Mapper
 
             if (is_callable($sourcePath)) {
                 $value = $sourcePath($this->source);
+            } else if (!preg_match('/\./', $sourcePath) && method_exists($this->source, $sourcePath)) {
+                $value = $this->source->{$sourcePath}();
             } else {
                 $value = data_get($this->source, $sourcePath);
             }
