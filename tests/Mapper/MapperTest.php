@@ -49,13 +49,18 @@ class MapperTest extends TestCase
 
         $product = new \stdClass();
 
-        $mapper = new Mapper();
-
-        $product = $mapper->from($foreignData)->to($product)->using([
-            'id'    => 'Response.Item.Id',
-            'name'  => 'Response.Item.Name',
-            'title' => 'Response.Non.Existent',
-        ])->defaults(['title' => 'Monkey'])->get();
+        $mapper  = new Mapper();
+        $product = $mapper->from($foreignData, [
+            'Response.Item.Id',
+            'Response.Item.Name',
+            'Response.Non.Existent',
+        ])->to($product, [
+            'id',
+            'name',
+            'title',
+        ])->withDefaults([
+            'title' => 'Monkey',
+        ])->get();
 
         $this->assertEquals(1234, $product->id);
         $this->assertEquals('iPhone 8', $product->name);
@@ -76,10 +81,7 @@ class MapperTest extends TestCase
 
         $mapper = new Mapper();
 
-        $product = $mapper->from($response)->to($product)->using([
-            'id'   => 'Item.Id',
-            'name' => 'Item.Name',
-        ])->get();
+        $product = $mapper->from($response, ['Item.Id', 'Item.Name'])->to($product, ['id', 'name'])->get();
 
         $this->assertEquals(1234, $product->id);
         $this->assertEquals('iPhone 8', $product->name);
@@ -130,10 +132,12 @@ class MapperTest extends TestCase
         $item = new Item();
 
         $mapper = new Mapper();
-
-        $item = $mapper->from($foreignData)->to($item)->using([
-            'setId'   => 'Response.Item.Id',
-            'setName' => 'Response.Item.Name',
+        $item = $mapper->from($foreignData, [
+            'Response.Item.Id',
+            'Response.Item.Name',
+        ])->to($item, [
+            'setId',
+            'setName',
         ])->get();
 
         $this->assertEquals('iPhone 8', $item->getName());
@@ -157,11 +161,14 @@ class MapperTest extends TestCase
 
         $mapper = new Mapper([]);
 
-        $item = $mapper->from($foreignData)->to($item)->using([
-            'setId'   => 'Response.Item.Id',
-            'setName' => function ($data) {
+        $item = $mapper->from($foreignData, [
+            'Response.Item.Id',
+            function ($data) {
                 return strtoupper($data['Response']['Item']['Name']);
             },
+        ])->to($item, [
+            'setId',
+            'setName',
         ])->get();
 
         $this->assertEquals('IPHONE 8', $item->getName());
@@ -195,16 +202,15 @@ class MapperTest extends TestCase
      */
     public function it_can_call_a_source_method()
     {
-        $item = new SourceItem();
+        $item    = new SourceItem();
         $product = new \stdClass();
 
         $mapper = new Mapper();
 
-        $item = $mapper->from($item)->to($product)->using([
-            'listId'   => 'getListId',
-        ])->get();
+        $item = $mapper->from($item, ['getListId'])->to($product, ['listId'])->get();
 
 
         $this->assertEquals('list-123', $product->listId);
     }
+
 }

@@ -27,7 +27,6 @@ class ProductMap extends Mappable
         ];
     }
 
-
     public function getTitle($data)
     {
 

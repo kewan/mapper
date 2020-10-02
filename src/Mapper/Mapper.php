@@ -8,35 +8,19 @@ class Mapper
 {
     private $source;
 
+    private $reader;
+
     private $destination;
     private $defaults;
+
     private $mappings;
 
-    /** @var Mappable $mappable */
-    private $mappable;
+    private $sourcePaths = [];
+    private $destinationPaths = [];
 
-    public function __construct($mappable=[])
+    public function __construct($mappable = [])
     {
-        $this->using($mappable);
-    }
-
-    public function from($source)
-    {
-        $this->source = $source;
-
-        return $this;
-    }
-
-    public function to($destination)
-    {
-        $this->destination = $destination;
-
-        return $this;
-    }
-
-    public function using($mappable)
-    {
-        if(!$mappable instanceof Mappable) {
+        if (!$mappable instanceof Mappable) {
             $mappable = new MappableArray($mappable);
         }
 
@@ -46,7 +30,30 @@ class Mapper
         return $this;
     }
 
-    public function defaults($defaults)
+    public function from($source, $sourcePaths = [])
+    {
+        $this->source = $source;
+        $this->reader = new Reader($source);
+
+        if (!empty($sourcePaths)) {
+            $this->sourcePaths = $sourcePaths;
+        }
+
+        return $this;
+    }
+
+    public function to($destination, $destinationPaths = [])
+    {
+        $this->destination = $destination;
+
+        if (!empty($destinationPaths)) {
+            $this->destinationPaths = $destinationPaths;
+        }
+
+        return $this;
+    }
+
+    public function withDefaults($defaults)
     {
         $this->defaults = $defaults;
 
@@ -55,15 +62,9 @@ class Mapper
 
     public function get()
     {
-        foreach ($this->mappings as $destinationPath => $sourcePath) {
+        foreach ($this->getMappings() as $destinationPath => $sourcePath) {
 
-            if (is_callable($sourcePath)) {
-                $value = $sourcePath($this->source);
-            } else if ($this->canBeCalled($this->source, $sourcePath)) {
-                $value = $this->source->{$sourcePath}();
-            } else {
-                $value = data_get($this->source, $sourcePath);
-            }
+            $value = $this->reader->get($sourcePath);
 
             if (!$value && Arr::has($this->defaults, $destinationPath)) {
                 $value = Arr::get($this->defaults, $destinationPath);
@@ -77,6 +78,18 @@ class Mapper
         }
 
         return $this->destination;
+    }
+
+    private function getMappings()
+    {
+        $sourceCount      = count($this->sourcePaths);
+        $destinationCount = count($this->destinationPaths);
+
+        if ($sourceCount > 0 || $destinationCount > 0) {
+            return array_combine($this->destinationPaths, $this->sourcePaths);
+        }
+
+        return $this->mappings;
     }
 
     private function canBeCalled($object, $method)
